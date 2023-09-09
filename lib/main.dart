@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movies_app/router/app_routes.dart';
+import 'package:movies_app/screens/screens.dart';
 import 'package:movies_app/theme/app_theme.dart';
 
 void main() {
@@ -13,12 +13,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Movies',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      initialRoute: AppRoutes.initialRoute,
-      routes: AppRoutes.getAppRoutes(),
-      onGenerateRoute: AppRoutes.onGenerateRoute,
+      initialRoute: 'home',
+      routes: {
+        'home': (_) => const HomeScreen(),
+        'details': (_) => const DetailsScreen()
+      },
     );
   }
 }
