@@ -1,7 +1,16 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:movies_app/models/models.dart';
 
 class MovieSlider extends StatelessWidget {
-  const MovieSlider({Key? key}) : super(key: key);
+  final List<Movie> movies;
+  final String? listTitle;
+  final dynamic Function() nextPage;
+
+  const MovieSlider(
+      {Key? key, required this.movies, this.listTitle, required this.nextPage})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,34 +19,92 @@ class MovieSlider extends StatelessWidget {
       width: double.infinity,
       height: 273,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Text(
-            'Populares',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        if (listTitle != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Text(
+              listTitle!,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
-        _Carousel()
+        _Carousel(movies: movies, nextPage: nextPage)
       ]),
     );
   }
 }
 
 //La barra baja significa que es un widget privado de este archivo
-class _Carousel extends StatelessWidget {
+class _Carousel extends StatefulWidget {
+  final List<Movie> movies;
+  final dynamic Function() nextPage;
+
+  const _Carousel({Key? key, required this.movies, required this.nextPage})
+      : super(key: key);
+
+  @override
+  State<_Carousel> createState() => _CarouselState();
+}
+
+class _CarouselState extends State<_Carousel> {
+  final ScrollController scrollController = ScrollController();
+  bool loading = false;
+  Future fetchData() async {
+    if (loading) return;
+    loading = true;
+    setState(() {});
+    await Future.delayed(const Duration(seconds: 3));
+    await widget.nextPage();
+    loading = false;
+    setState(() {});
+    if (scrollController.position.pixels >=
+        (scrollController.position.maxScrollExtent - 500)) {
+      scrollController.animateTo(scrollController.position.pixels + 120,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.fastOutSlowIn);
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels ==
+          scrollController.position.maxScrollExtent) fetchData();
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
+        controller: scrollController,
         scrollDirection: Axis.horizontal,
-        itemCount: 20,
-        itemBuilder: (BuildContext context, int index) => _CarouselCard(),
+        itemCount: widget.movies.length,
+        itemBuilder: (BuildContext context, int index) {
+          final Movie movie = widget.movies[index];
+          return _CarouselCard(
+              image: movie.fullPosterImg, title: movie.title, id: movie.id);
+        },
       ),
     );
   }
 }
 
 class _CarouselCard extends StatelessWidget {
+  final String image;
+  final String title;
+  final int id;
+
+  const _CarouselCard(
+      {Key? key, required this.image, required this.title, required this.id})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -48,14 +115,13 @@ class _CarouselCard extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, 'details',
-                  arguments: 'movie-instance');
+              Navigator.pushNamed(context, 'details', arguments: id);
             },
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: const FadeInImage(
-                placeholder: AssetImage('assets/no-image.jpg'),
-                image: NetworkImage('https://via.placeholder.com/300x400'),
+              child: FadeInImage(
+                placeholder: const AssetImage('assets/no-image.jpg'),
+                image: NetworkImage(image),
                 width: 130,
                 height: 190,
                 fit: BoxFit.cover,
@@ -65,8 +131,8 @@ class _CarouselCard extends StatelessWidget {
           const SizedBox(
             height: 5,
           ),
-          const Text(
-            'Starwars: El retorno del nuevo Jedi Silvestre de Montecristo',
+          Text(
+            title,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
             textAlign: TextAlign.center,
