@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:movies_app/providers/providers.dart';
 import 'package:movies_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final moviesProvider = Provider.of<MoviesProvider>(context, listen: true);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Películas en cines'),
@@ -16,17 +19,18 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-      body: const SingleChildScrollView(
+      body: SingleChildScrollView(
         //para manejar el desbordamiento vertical
         child: Column(
           children: [
-            //TODO: card swiper ✔✔✔✔✔✔
+            //completed: card swiper ✔✔✔✔✔✔
             //tarjetas principales:
-            CardSwiper(),
-            //TODO: Listado horizontal de peliculas
-            MovieSlider(),
-            MovieSlider(),
-            MovieSlider()
+            CardSwiper(movies: moviesProvider.onDisplayMovies),
+            //completed: Listado horizontal de peliculas
+            MovieSlider(
+                movies: moviesProvider.popularMovies,
+                listTitle: 'Populares!',
+                nextPage: () => moviesProvider.nextPopularPage())
           ],
         ),
       ),
