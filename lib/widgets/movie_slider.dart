@@ -52,7 +52,7 @@ class _CarouselState extends State<_Carousel> {
     if (loading) return;
     loading = true;
     setState(() {});
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(milliseconds: 500));
     await widget.nextPage();
     loading = false;
     setState(() {});
@@ -89,8 +89,7 @@ class _CarouselState extends State<_Carousel> {
         itemCount: widget.movies.length,
         itemBuilder: (BuildContext context, int index) {
           final Movie movie = widget.movies[index];
-          return _CarouselCard(
-              image: movie.fullPosterImg, title: movie.title, id: movie.id);
+          return _CarouselCard(movie: movie);
         },
       ),
     );
@@ -98,13 +97,9 @@ class _CarouselState extends State<_Carousel> {
 }
 
 class _CarouselCard extends StatelessWidget {
-  final String image;
-  final String title;
-  final int id;
+  final Movie movie;
 
-  const _CarouselCard(
-      {Key? key, required this.image, required this.title, required this.id})
-      : super(key: key);
+  const _CarouselCard({Key? key, required this.movie}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -115,13 +110,13 @@ class _CarouselCard extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, 'details', arguments: id);
+              Navigator.pushNamed(context, 'details', arguments: movie);
             },
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: FadeInImage(
                 placeholder: const AssetImage('assets/no-image.jpg'),
-                image: NetworkImage(image),
+                image: NetworkImage(movie.fullPosterImg),
                 width: 130,
                 height: 190,
                 fit: BoxFit.cover,
@@ -132,7 +127,7 @@ class _CarouselCard extends StatelessWidget {
             height: 5,
           ),
           Text(
-            title,
+            movie.title,
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
             textAlign: TextAlign.center,
