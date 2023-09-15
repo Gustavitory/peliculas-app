@@ -1,15 +1,16 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:movies_app/models/models.dart';
 
 class MovieSlider extends StatelessWidget {
   final List<Movie> movies;
-  final String? listTitle;
+  final String listTitle;
   final dynamic Function() nextPage;
 
   const MovieSlider(
-      {Key? key, required this.movies, this.listTitle, required this.nextPage})
+      {Key? key,
+      required this.movies,
+      required this.listTitle,
+      required this.nextPage})
       : super(key: key);
 
   @override
@@ -19,15 +20,14 @@ class MovieSlider extends StatelessWidget {
       width: double.infinity,
       height: 273,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (listTitle != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Text(
-              listTitle!,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Text(
+            listTitle,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-        _Carousel(movies: movies, nextPage: nextPage)
+        ),
+        _Carousel(movies: movies, nextPage: nextPage, listName: listTitle)
       ]),
     );
   }
@@ -37,8 +37,13 @@ class MovieSlider extends StatelessWidget {
 class _Carousel extends StatefulWidget {
   final List<Movie> movies;
   final dynamic Function() nextPage;
+  final String listName;
 
-  const _Carousel({Key? key, required this.movies, required this.nextPage})
+  const _Carousel(
+      {Key? key,
+      required this.movies,
+      required this.nextPage,
+      required this.listName})
       : super(key: key);
 
   @override
@@ -89,7 +94,7 @@ class _CarouselState extends State<_Carousel> {
         itemCount: widget.movies.length,
         itemBuilder: (BuildContext context, int index) {
           final Movie movie = widget.movies[index];
-          return _CarouselCard(movie: movie);
+          return _CarouselCard(movie: movie, listName: widget.listName);
         },
       ),
     );
@@ -98,10 +103,13 @@ class _CarouselState extends State<_Carousel> {
 
 class _CarouselCard extends StatelessWidget {
   final Movie movie;
+  final String listName;
 
-  const _CarouselCard({Key? key, required this.movie}) : super(key: key);
+  const _CarouselCard({Key? key, required this.movie, required this.listName})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
+    movie.heroID = 'slider-${movie.id}-$listName';
     return Container(
       width: 130,
       height: 190,
@@ -112,14 +120,17 @@ class _CarouselCard extends StatelessWidget {
             onTap: () {
               Navigator.pushNamed(context, 'details', arguments: movie);
             },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: FadeInImage(
-                placeholder: const AssetImage('assets/no-image.jpg'),
-                image: NetworkImage(movie.fullPosterImg),
-                width: 130,
-                height: 190,
-                fit: BoxFit.cover,
+            child: Hero(
+              tag: movie.heroID!,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: FadeInImage(
+                  placeholder: const AssetImage('assets/no-image.jpg'),
+                  image: NetworkImage(movie.fullPosterImg),
+                  width: 130,
+                  height: 190,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),

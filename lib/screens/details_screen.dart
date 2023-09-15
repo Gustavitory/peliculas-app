@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:movies_app/models/models.dart';
 import 'package:movies_app/widgets/widgets.dart' show CastingCard;
@@ -10,6 +8,7 @@ class DetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Movie movie = ModalRoute.of(context)!.settings.arguments as Movie;
+    print(movie.heroID);
     return Scaffold(
         body: CustomScrollView(
       slivers: [
@@ -19,12 +18,7 @@ class DetailsScreen extends StatelessWidget {
         ),
         SliverList(
           delegate: SliverChildListDelegate([
-            _PosterAndTitle(
-              title: movie.title,
-              originalTitle: movie.originalTitle,
-              poster: movie.fullPosterImg,
-              rate: movie.voteAverage,
-            ),
+            _PosterAndTitle(movie: movie),
             _Overview(
               description: movie.overview,
             ),
@@ -74,15 +68,10 @@ class _CustomAppBar extends StatelessWidget {
 }
 
 class _PosterAndTitle extends StatelessWidget {
-  final String poster;
-  final String title;
-  final String originalTitle;
-  final double rate;
-  const _PosterAndTitle(
-      {required this.poster,
-      required this.title,
-      required this.originalTitle,
-      required this.rate});
+  final Movie movie;
+  const _PosterAndTitle({
+    required this.movie,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +81,15 @@ class _PosterAndTitle extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: FadeInImage(
-              placeholder: const AssetImage('assets/no-image.jpg'),
-              image: NetworkImage(poster),
-              height: 150,
+          Hero(
+            tag: movie.heroID!,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: FadeInImage(
+                placeholder: const AssetImage('assets/no-image.jpg'),
+                image: NetworkImage(movie.fullPosterImg),
+                height: 150,
+              ),
             ),
           ),
           const SizedBox(
@@ -107,13 +99,13 @@ class _PosterAndTitle extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
+                Text(movie.title,
                     style: textTheme.headlineSmall,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2),
                 Text(
-                  originalTitle,
+                  movie.originalTitle,
                   style: textTheme.titleMedium,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
@@ -129,7 +121,7 @@ class _PosterAndTitle extends StatelessWidget {
                       width: 5,
                     ),
                     Text(
-                      '$rate',
+                      '${movie.voteAverage}',
                       style: textTheme.bodySmall,
                     )
                   ],
@@ -152,7 +144,7 @@ class _Overview extends StatelessWidget {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
         child: Text(
-          description,
+          description != '' ? description : 'No hay sinapsis disponible.',
           textAlign: TextAlign.justify,
           style: Theme.of(context).textTheme.titleMedium,
         ));
