@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:movies_app/models/API/lenguaje.dart';
-
 class Movie {
   bool adult;
   String? backdropPath;
@@ -18,22 +16,24 @@ class Movie {
   double voteAverage;
   int voteCount;
 
-  Movie({
-    required this.adult,
-    this.backdropPath,
-    required this.genreIds,
-    required this.id,
-    required this.originalLanguage,
-    required this.originalTitle,
-    required this.overview,
-    required this.popularity,
-    this.posterPath,
-    this.releaseDate,
-    required this.title,
-    required this.video,
-    required this.voteAverage,
-    required this.voteCount,
-  });
+  String? heroID;
+
+  Movie(
+      {required this.adult,
+      this.backdropPath,
+      required this.genreIds,
+      required this.id,
+      required this.originalLanguage,
+      required this.originalTitle,
+      required this.overview,
+      required this.popularity,
+      this.posterPath,
+      this.releaseDate,
+      required this.title,
+      required this.video,
+      required this.voteAverage,
+      required this.voteCount,
+      this.heroID});
 
   get fullPosterImg {
     if (posterPath != null) return 'https://image.tmdb.org/t/p/w500$posterPath';
